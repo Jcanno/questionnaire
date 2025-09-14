@@ -33,8 +33,6 @@ interface Answer {
 
 const API_KEY = 'zI3HIeAbth8nzNBdvUAAthQX'
 
-const testData = [{questionId: 1, answer: 'A'}, {questionId: 2, answer: 'B'}, {questionId: 3, answer: 'C'}, {questionId: 4, answer: 'D'}, {questionId: 5, answer: 'E'}, {questionId: 6, answer: 'F'}, {questionId: 7, answer: 'G'}, {questionId: 8, answer: 'H'}, {questionId: 9, answer: 'I'}, {questionId: 10, answer: 'J'}, {questionId: 11, answer: 'K'}, {questionId: 12, answer: 'L'}, {questionId: 13, answer: 'M'}, {questionId: 14, answer: 'N'}, {questionId: 15, answer: 'O'}, {questionId: 16, answer: 'P'}, {questionId: 17, answer: 'Q'}]
-
 function App() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState<Answer[]>([])
@@ -170,8 +168,6 @@ function App() {
 
     const nextQuestionId = getNextQuestionId()
     if (nextQuestionId === null) {
-      const newData = [...recordData, answers]
-      
       // 这里对answers处理成字符串，同时进行加密
       const encryptedData = encrypt(JSON.stringify(answers))
       // 随机数
