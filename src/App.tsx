@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import axios from 'axios'
 import { 
   Card, 
   Radio, 
@@ -9,7 +10,7 @@ import {
   Space, 
   Progress, 
   message,
-  Result
+  Result,
 } from 'antd'
 import { 
   ArrowLeftOutlined, 
@@ -27,6 +28,8 @@ interface Answer {
   answer: string | string[]
 }
 
+const API_KEY = 'zI3HIeAbth8nzNBdvUAAthQX'
+
 function App() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState<Answer[]>([])
@@ -36,7 +39,25 @@ function App() {
 
   const currentQuestion = QUESTIONNAIRE_QUESTION_LIST[currentQuestionIndex]
   const progress = ((currentQuestionIndex + 1) / QUESTIONNAIRE_QUESTION_LIST.length) * 100
+  const [recordData, setRecordData] = useState([])
 
+  // 获取数据
+  const fetchData = async () => {
+    
+    try {
+      const response = await axios.get(`https://textdb.online/${API_KEY}`, {
+        headers: {
+          'Content-Type': 'text/plain',
+        },
+      })
+
+      setRecordData(response.data ? response.data : [])
+      
+    } catch (error) {
+    } finally {
+    }
+  }
+  
   // 初始化当前答案
   useEffect(() => {
     const existingAnswer = answers.find(a => a.questionId === currentQuestion.id)
@@ -50,6 +71,11 @@ function App() {
       }
     }
   }, [currentQuestion.id, answers])
+
+  // 获取数据
+  useEffect(() => {
+    fetchData()
+  }, [])
 
   // 保存答案
   const saveAnswer = () => {
@@ -90,7 +116,7 @@ function App() {
   }
 
   // 跳转到下一题
-  const handleNext = () => {
+   const handleNext = async () => {
     if (!currentAnswer || (Array.isArray(currentAnswer) && currentAnswer.length === 0)) {
       message.warning('请先回答问题')
       return
@@ -100,6 +126,14 @@ function App() {
 
     const nextQuestionId = getNextQuestionId()
     if (nextQuestionId === null) {
+      const newData = [...recordData, answers]
+      await axios.get(`https://textdb.online/update/`, {
+        params: {
+          key: API_KEY,
+          value: JSON.stringify(newData)
+        }
+      })
+
       setIsCompleted(true)
       return
     }
@@ -233,7 +267,7 @@ function App() {
 
   return (
     <div className="questionnaire-container">
-      <div style={{ maxWidth: 800, margin: '0 auto' }}>
+      <div style={{ margin: '0 auto' }}>
         {/* 进度条 */}
         <Card className="progress-card" style={{ marginBottom: '20px' }}>
           <div style={{ textAlign: 'center', marginBottom: '16px' }}>
