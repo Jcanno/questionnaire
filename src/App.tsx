@@ -43,7 +43,7 @@ function App() {
   const currentQuestion = QUESTIONNAIRE_QUESTION_LIST[currentQuestionIndex]
   const progress = ((currentQuestionIndex + 1) / QUESTIONNAIRE_QUESTION_LIST.length) * 100
   const [recordKeys, setRecordKeys] = useState([])
-  const [recordData, setRecordData] = useState([])
+  const [, setRecordData] = useState([])
 
   // 获取数据
   const fetchData = async () => {
