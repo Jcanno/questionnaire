@@ -25,7 +25,7 @@ const { TextArea } = Input
 
 interface Answer {
   questionId: number
-  answer: string | string[]
+  answer: string | string[] | { checkBox: string[], text: string }
 }
 
 const API_KEY = 'zI3HIeAbth8nzNBdvUAAthQX'
@@ -33,7 +33,7 @@ const API_KEY = 'zI3HIeAbth8nzNBdvUAAthQX'
 function App() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState<Answer[]>([])
-  const [currentAnswer, setCurrentAnswer] = useState<string | string[] | string>('')
+  const [currentAnswer, setCurrentAnswer] = useState<string | string[] | string | { checkBox: string[], text: string }>('')
   const [isCompleted, setIsCompleted] = useState(false)
   const [questionHistory, setQuestionHistory] = useState<number[]>([1])
 
@@ -108,7 +108,7 @@ function App() {
         return firstAnswer ? (currentQuestion.toId as any)[firstAnswer] : null
       } else {
         // 单选情况
-        return currentAnswer ? (currentQuestion.toId as any)[currentAnswer] : null
+        return currentAnswer ? (currentQuestion.toId as any)[currentAnswer as any] : null
       }
     }
 
@@ -116,7 +116,7 @@ function App() {
   }
 
   // 跳转到下一题
-   const handleNext = async () => {
+  const handleNext = async () => {
     if (!currentAnswer || (Array.isArray(currentAnswer) && currentAnswer.length === 0)) {
       message.warning('请先回答问题')
       return
@@ -127,12 +127,14 @@ function App() {
     const nextQuestionId = getNextQuestionId()
     if (nextQuestionId === null) {
       const newData = [...recordData, answers]
-      await axios.get(`https://textdb.online/update/`, {
-        params: {
-          key: API_KEY,
-          value: JSON.stringify(newData)
-        }
-      })
+      console.log('newData', newData);
+      
+      // await axios.get(`https://textdb.online/update/`, {
+      //   params: {
+      //     key: API_KEY,
+      //     value: JSON.stringify(newData)
+      //   }
+      // })
 
       setIsCompleted(true)
       return
@@ -161,7 +163,22 @@ function App() {
   }
 
   // 处理答案变化
-  const handleAnswerChange = (value: any) => {
+  const handleAnswerChange = (value: any, field?: string) => {
+    console.log('currentAnswer', currentAnswer);
+    console.log('field', field);
+    console.log('value', value);
+    
+    if (field) {
+      setCurrentAnswer({
+        ...(currentAnswer as any || {
+          checkBox: [],
+          text: ''
+        }),
+        [field]: value
+      })
+
+      return 
+    }
     setCurrentAnswer(value)
   }
 
@@ -192,24 +209,32 @@ function App() {
 
       case QuestionType.CHECKBOX:
         return (
-          <Checkbox.Group 
-            value={currentAnswer as string[]} 
-            onChange={handleAnswerChange}
-            style={{ width: '100%' }}
-          >
-            <Space direction="vertical" style={{ width: '100%' }}>
-              {currentQuestion.options?.map(option => (
-                <Checkbox 
-                  key={option.value} 
-                  value={option.value} 
-                  className="option-item"
-                  style={{ fontSize: '16px', width: '100%' }}
-                >
-                  {option.label}
-                </Checkbox>
-              ))}
-            </Space>
-          </Checkbox.Group>
+          <>
+            <Checkbox.Group 
+              value={(currentAnswer as { checkBox: string[], text: string }).checkBox as string[]} 
+              onChange={v => handleAnswerChange(v, 'checkBox')}
+              style={{ width: '100%' }}
+            >
+              <Space direction="vertical" style={{ width: '100%' }}>
+                {currentQuestion.options?.map(option => (
+                  <Checkbox 
+                    key={option.value} 
+                    value={option.value} 
+                    className="option-item"
+                    style={{ fontSize: '16px', width: '100%' }}
+                  >
+                    {option.label}
+                  </Checkbox>
+                ))}
+              </Space>
+            </Checkbox.Group>
+            <Input
+              placeholder='其他'
+              style={{ marginTop: 10 }}
+              value={(currentAnswer as { checkBox: string[], text: string }).text}
+              onChange={e => handleAnswerChange(e.target.value, 'text')}
+            ></Input>
+          </>
         )
 
       case QuestionType.TEXT:

@@ -118,7 +118,7 @@ export const QUESTIONNAIRE_QUESTION_LIST = [
     id: 6,
     question: '你认为单身阶段，自己可以在哪些方面为未来的婚姻做预备？（请多选）',
     type: QuestionType.CHECKBOX,
-    isLast: true,
+    toId: 17,
     options: [{
       label: '灵命成长',
       value: 'A',
@@ -162,7 +162,7 @@ export const QUESTIONNAIRE_QUESTION_LIST = [
     id: 9,
     question: '你们会如何处理和解决冲突？（请多选）',
     type: QuestionType.CHECKBOX,
-    isLast: true,
+    toId: 17,
     options: [{
       label: '一起dg',
       value: 'A',
@@ -260,6 +260,12 @@ export const QUESTIONNAIRE_QUESTION_LIST = [
     id: 16,
     question: '你如何平衡夫妻关系与亲子关系？',
     type: QuestionType.TEXTAREA,
-    isLast: true,
+    toId: 17
   },
+  {
+    id: 17,
+    question: '你对本次讲座有什么具体的期待？或者你最想听讲员分享哪方面的真理或经验？',
+    type: QuestionType.TEXTAREA,
+    isLast: true,
+  }
 ]
