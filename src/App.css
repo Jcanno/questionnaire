@@ -1,0 +1,149 @@
+/* 问卷应用样式 */
+.questionnaire-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  width: 100vw;
+}
+
+.question-card {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  border: none;
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.progress-card {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  border: none;
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.question-title {
+  color: #2c3e50;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 24px !important;
+}
+
+.option-item {
+  padding: 12px 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.option-item:hover {
+  background-color: #f0f9ff;
+  border-color: #e6f7ff;
+}
+
+.option-item.ant-radio-wrapper-checked {
+  background-color: #e6f7ff;
+  border-color: #1890ff;
+}
+
+.option-item.ant-checkbox-wrapper-checked {
+  background-color: #f6ffed;
+  border-color: #52c41a;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+}
+
+.answer-counter {
+  color: #8c8c8c;
+  font-size: 14px;
+}
+
+.completion-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.completion-card {
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+  border-radius: 20px;
+  border: none;
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.answer-summary {
+  text-align: left;
+  margin-top: 24px;
+}
+
+.answer-item {
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: #fafafa;
+  border-radius: 8px;
+  border-left: 4px solid #1890ff;
+}
+
+.answer-question {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 8px;
+}
+
+.answer-text {
+  color: #666;
+  font-size: 14px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .questionnaire-container {
+    padding: 10px;
+  }
+  
+  .question-title {
+    font-size: 18px !important;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .action-buttons .ant-space {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* 动画效果 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.question-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.progress-card {
+  animation: fadeInUp 0.4s ease-out;
+}
