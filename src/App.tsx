@@ -204,14 +204,26 @@ function App() {
     }
   }
 
+  // 礼花动画组件
+  const ConfettiAnimation = () => {
+    return (
+      <div className="confetti-container">
+        {Array.from({ length: 25 }, (_, i) => (
+          <div key={i} className="confetti" />
+        ))}
+      </div>
+    )
+  }
+
   // 完成页面
   if (isCompleted) {
     return (
       <div className="completion-page">
+        <ConfettiAnimation />
         <Card className="completion-card">
           <Result
-            icon={<CheckCircleOutlined style={{ color: '#52c41a' }} />}
-            title="问卷完成！"
+            icon={<CheckCircleOutlined className="completion-icon" style={{ color: '#52c41a' }} />}
+            title="问卷完成"
             subTitle="感谢您参与本次问卷调查，您的回答对我们非常重要。"
           />
         </Card>
