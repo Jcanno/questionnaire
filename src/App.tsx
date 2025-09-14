@@ -19,26 +19,32 @@ import {
 } from '@ant-design/icons'
 import { QUESTIONNAIRE_QUESTION_LIST, QuestionType } from './constans'
 import './App.css'
+import { decrypt, encrypt, randomString } from './utils'
 
 const { Title, Text } = Typography
 const { TextArea } = Input
 
+type ObjCurrentAnwser = { checkBox: string[], text: string }
+
 interface Answer {
   questionId: number
-  answer: string | string[] | { checkBox: string[], text: string }
+  answer: string | string[] | ObjCurrentAnwser
 }
 
 const API_KEY = 'zI3HIeAbth8nzNBdvUAAthQX'
 
+const testData = [{questionId: 1, answer: 'A'}, {questionId: 2, answer: 'B'}, {questionId: 3, answer: 'C'}, {questionId: 4, answer: 'D'}, {questionId: 5, answer: 'E'}, {questionId: 6, answer: 'F'}, {questionId: 7, answer: 'G'}, {questionId: 8, answer: 'H'}, {questionId: 9, answer: 'I'}, {questionId: 10, answer: 'J'}, {questionId: 11, answer: 'K'}, {questionId: 12, answer: 'L'}, {questionId: 13, answer: 'M'}, {questionId: 14, answer: 'N'}, {questionId: 15, answer: 'O'}, {questionId: 16, answer: 'P'}, {questionId: 17, answer: 'Q'}]
+
 function App() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState<Answer[]>([])
-  const [currentAnswer, setCurrentAnswer] = useState<string | string[] | string | { checkBox: string[], text: string }>('')
+  const [currentAnswer, setCurrentAnswer] = useState<string | string[] | string | ObjCurrentAnwser>('')
   const [isCompleted, setIsCompleted] = useState(false)
   const [questionHistory, setQuestionHistory] = useState<number[]>([1])
 
   const currentQuestion = QUESTIONNAIRE_QUESTION_LIST[currentQuestionIndex]
   const progress = ((currentQuestionIndex + 1) / QUESTIONNAIRE_QUESTION_LIST.length) * 100
+  const [recordKeys, setRecordKeys] = useState([])
   const [recordData, setRecordData] = useState([])
 
   // 获取数据
@@ -51,7 +57,28 @@ function App() {
         },
       })
 
-      setRecordData(response.data ? response.data : [])
+      console.log('response', response);
+
+      const newRecordKeys = response.data ? response.data.split(',') : []
+      
+
+      setRecordKeys(newRecordKeys)
+      
+      const allRecordDataPromises = newRecordKeys.map((key: string) => {
+        return axios.get(`https://textdb.online/${key}`, {
+          headers: {
+            'Content-Type': 'text/plain',
+          },
+        })
+      })
+
+      const allRecordData: any = await Promise.all(allRecordDataPromises)
+      const data = allRecordData
+        .map((data: any) => decrypt(data.data))
+        .filter((item: any) => item !== null) // 过滤掉解密失败的数据
+      
+      setRecordData(data)
+
       
     } catch (error) {
     } finally {
@@ -84,8 +111,16 @@ function App() {
       answer: currentAnswer
     }
 
+    const { idMap = {} } = currentQuestion as any
+    const questionIdMap = (idMap as any)[currentAnswer as any]
+
     setAnswers(prev => {
-      const filtered = prev.filter(a => a.questionId !== currentQuestion.id)
+      let filtered = prev.filter(a => a.questionId !== currentQuestion.id)
+      
+      if(Array.isArray(questionIdMap)) {
+        filtered = filtered.filter(a => questionIdMap.includes(a.questionId))
+      }
+      
       return [...filtered, newAnswer]
     })
   }
@@ -122,19 +157,39 @@ function App() {
       return
     }
 
+    if (typeof currentAnswer === 'object' &&
+      !(currentAnswer as ObjCurrentAnwser).text &&
+      (!(currentAnswer as ObjCurrentAnwser).checkBox ||
+        Array.isArray((currentAnswer as ObjCurrentAnwser).checkBox) &&
+        !(currentAnswer as ObjCurrentAnwser).checkBox.length)) {
+          message.warning('请先回答问题')
+          return
+        }
+
     saveAnswer()
 
     const nextQuestionId = getNextQuestionId()
     if (nextQuestionId === null) {
       const newData = [...recordData, answers]
-      console.log('newData', newData);
       
-      // await axios.get(`https://textdb.online/update/`, {
-      //   params: {
-      //     key: API_KEY,
-      //     value: JSON.stringify(newData)
-      //   }
-      // })
+      // 这里对answers处理成字符串，同时进行加密
+      const encryptedData = encrypt(JSON.stringify(answers))
+      // 随机数
+      const randomKey = randomString()
+
+      await axios.get(`https://textdb.online/update/`, {
+        params: {
+          key: randomKey,
+          value: encryptedData
+        }
+      })
+
+      await axios.get(`https://textdb.online/update/`, {
+        params: {
+          key: API_KEY,
+          value: [randomKey, ...recordKeys].join(',')
+        }
+      })
 
       setIsCompleted(true)
       return
@@ -164,10 +219,6 @@ function App() {
 
   // 处理答案变化
   const handleAnswerChange = (value: any, field?: string) => {
-    console.log('currentAnswer', currentAnswer);
-    console.log('field', field);
-    console.log('value', value);
-    
     if (field) {
       setCurrentAnswer({
         ...(currentAnswer as any || {
@@ -211,7 +262,7 @@ function App() {
         return (
           <>
             <Checkbox.Group 
-              value={(currentAnswer as { checkBox: string[], text: string }).checkBox as string[]} 
+              value={(currentAnswer as ObjCurrentAnwser).checkBox as string[]} 
               onChange={v => handleAnswerChange(v, 'checkBox')}
               style={{ width: '100%' }}
             >
@@ -231,7 +282,7 @@ function App() {
             <Input
               placeholder='其他'
               style={{ marginTop: 10 }}
-              value={(currentAnswer as { checkBox: string[], text: string }).text}
+              value={(currentAnswer as ObjCurrentAnwser).text}
               onChange={e => handleAnswerChange(e.target.value, 'text')}
             ></Input>
           </>

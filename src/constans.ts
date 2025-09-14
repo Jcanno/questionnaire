@@ -47,6 +47,11 @@ export const QUESTIONNAIRE_QUESTION_LIST = [
       B: 7,
       C: 10,
     },
+    idMap: {
+      A: [1, 2, 3, 4, 5, 6, 17],
+      B: [1, 2, 3, 7, 8, 9, 17],
+      C: [10, 11, 12, 13, 14, 15, 16, 17]
+    },
     options: [{
       label: '未婚，无恋爱对象',
       value: 'A',
